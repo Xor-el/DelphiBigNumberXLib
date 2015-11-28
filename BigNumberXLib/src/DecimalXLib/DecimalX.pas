@@ -272,29 +272,29 @@ type
     /// <summary>
     /// Min Integer value.
     /// </summary>
-    MinIntValue: Integer = -2147483648;
+    MinIntValue = -2147483648;
     /// <summary>
     /// Max Integer value.
     /// </summary>
-    MaxIntValue: Integer = 2147483647;
+    MaxIntValue = 2147483647;
     /// <summary>
     /// Max Int64 value.
     /// </summary>
-    MaxInt64Value: Int64 = 9223372036854775807;
+    MaxInt64Value = 9223372036854775807;
     /// <summary>
     /// Exponent bias in the 64-bit floating point representation.
     /// </summary>
-    DoubleExponentBias = Integer(1023);
+    DoubleExponentBias = 1023;
 
     /// <summary>
     /// The size in bits of the significand in the 64-bit floating point representation.
     /// </summary>
-    DoubleSignificandBitLength = Integer(52);
+    DoubleSignificandBitLength = 52;
 
     /// <summary>
     /// How much to shift to accommodate the exponent and the binary digits of the significand.
     /// </summary>
-    DoubleShiftBias = Integer(DoubleExponentBias + DoubleSignificandBitLength);
+    DoubleShiftBias = DoubleExponentBias + DoubleSignificandBitLength;
 
     DoublePositiveInfinity: Double = 1.0 / 0.0;
 
@@ -2859,11 +2859,6 @@ var
   divisor, roundedInteger: TIntegerX;
   tempRes: TDecimalX;
 begin
-  { if (c.Precision = 0) then
-    begin
-    result := v;
-    Exit;
-    end; }
 
   if (v.GetPrecision() < c.Precision) then
   begin
