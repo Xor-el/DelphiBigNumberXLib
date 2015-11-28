@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{FBCE96A6-F56F-4683-8892-12862FB3E387}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="BigNumberXLib.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="BigNumberXLibTest.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="BigNumberXLib">
+        <MSBuild Projects="BigNumberXLib.dproj"/>
+    </Target>
+    <Target Name="BigNumberXLib:Clean">
+        <MSBuild Projects="BigNumberXLib.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="BigNumberXLib:Make">
+        <MSBuild Projects="BigNumberXLib.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="BigNumberXLibTest">
+        <MSBuild Projects="BigNumberXLibTest.dproj"/>
+    </Target>
+    <Target Name="BigNumberXLibTest:Clean">
+        <MSBuild Projects="BigNumberXLibTest.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="BigNumberXLibTest:Make">
+        <MSBuild Projects="BigNumberXLibTest.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="BigNumberXLib;BigNumberXLibTest"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="BigNumberXLib:Clean;BigNumberXLibTest:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="BigNumberXLib:Make;BigNumberXLibTest:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
