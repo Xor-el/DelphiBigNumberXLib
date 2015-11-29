@@ -130,4 +130,4 @@ This Program is Licensed Under **`Mozilla Public License  v. 2.0`**
 Conclusion
 --------------------------------------------------
 
-   Special Thanks to (David Miller) for creating [ClojureCLR](https://github.com/clojure/clojure-clr/) .
+   Special Thanks to the makers of [ClojureCLR](https://github.com/clojure/clojure-clr/) .
