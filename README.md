@@ -1,7 +1,7 @@
-ArbitraryXLib
+BigNumberXLib
 ====
 
- **`ArbitraryXLib`** is a Delphi Big Number Library with support for Integer and Floating Point Computations.
+ **`BigNumberXLib`** is a Delphi Big Number Library with support for Integer and Floating Point Computations.
  It consists of three custom types namely 
 
     
