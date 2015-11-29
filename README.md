@@ -35,8 +35,8 @@ ArbitraryXLib
       in order to avoid issues with "Non-terminating decimal expansion" like (1/3) 
       since this Library is an "Unlimited" Precision Library.
       When using the "Chaining Mode", do note that it uses Left to Right precedence 
-      rather than "PEDMAS" or "BODMAS".
-      In order to use "PEDMAS" or "BODMAS" precedence in Chaining Mode, you have
+      rather than "PEMDAS" or "BODMAS".
+      In order to use "PEMDAS" or "BODMAS" precedence in Chaining Mode, you have
       to group the preferred operations in Parenthesis.
 
     3. Note that when using the Double Constructor of "TDecimalX", 
