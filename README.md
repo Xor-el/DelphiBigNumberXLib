@@ -24,6 +24,8 @@ BigNumberXLib
         upwards) with little or no modifications but have not been tested by me. 
        
     3. Finally, Mobile Compilers are Supported.
+    
+    4. This Library is Locale-Aware but it's Unit Tests are not.
   
    
 **`Usage Hints`**
