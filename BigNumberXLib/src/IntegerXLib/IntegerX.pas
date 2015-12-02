@@ -144,6 +144,9 @@ type
     /// <param name="val">The value</param>
     /// <returns>The number of trailing zero bits </returns>
     class function TrailingZerosCount(val: UInt32): Integer; static;
+
+    class function BitLengthForUInt32(x: UInt32): UInt32; static;
+
     /// <summary>
     /// Counts Leading zero bits.
     /// This algo is in a lot of places.
@@ -161,6 +164,7 @@ type
     /// <seealso href="http://aggregate.org/MAGIC/#Population%20Count%20(Ones%20Count)">[Ones Count]</seealso>
 
     class function BitCount(x: UInt32): UInt32; static;
+
     /// <summary>
     /// Returns the index of the lowest set bit in this instance's magnitude.
     /// </summary>
@@ -1320,6 +1324,8 @@ type
     /// <returns>The magnitude</returns>
     /// <remarks>The returned array can be manipulated as you like = unshared.</remarks>
     function GetMagnitude(): TArray<UInt32>;
+
+    function BitLength(): UInt32;
 
     /// <summary>
     /// Creates a copy of a <see cref="TIntegerX"/>.
@@ -3034,6 +3040,11 @@ begin
   result := FTrailingZerosTable[byteVal] + 24;
 end;
 
+class function TIntegerX.BitLengthForUInt32(x: UInt32): UInt32;
+begin
+  result := 32 - LeadingZeroCount(x);
+end;
+
 class function TIntegerX.LeadingZeroCount(x: UInt32): UInt32;
 begin
   x := x or (x shr 1);
@@ -3630,6 +3641,43 @@ end;
 function TIntegerX.GetMagnitude(): TArray<UInt32>;
 begin
   result := copy(self._data, 0, Length(self._data));
+end;
+
+function TIntegerX.BitLength(): UInt32;
+var
+  m: TArray<UInt32>;
+  len, n, magBitLength, i: UInt32;
+  pow2: Boolean;
+begin
+  m := self._data;
+  len := Length(m);
+  if len = 0 then
+  begin
+    n := 0;
+  end
+  else
+  begin
+    magBitLength := ((len - 1) shl 5) + BitLengthForUInt32(m[0]);
+    if Signum < 0 then
+    begin
+      pow2 := BitCount(m[0]) = 1;
+      i := 1;
+      while ((i < len) and (pow2)) do
+      begin
+        pow2 := m[i] = 0;
+        Inc(i);
+      end;
+      if pow2 then
+        n := magBitLength - 1
+      else
+        n := magBitLength;
+    end
+    else
+    begin
+      n := magBitLength;
+    end;
+  end;
+  result := n;
 end;
 
 function TIntegerX.GetPrecision: UInt32;

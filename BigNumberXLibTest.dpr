@@ -16,7 +16,9 @@ uses
   IntegerX in 'BigNumberXLib\src\IntegerXLib\IntegerX.pas',
   DecimalX in 'BigNumberXLib\src\DecimalXLib\DecimalX.pas',
   IntegerXTest in 'BigNumberXLib.Test\IntegerXTest.pas',
-  DecimalXTest in 'BigNumberXLib.Test\DecimalXTest.pas';
+  DecimalXTest in 'BigNumberXLib.Test\DecimalXTest.pas',
+  DecimalXHelper in 'BigNumberXLib\src\Helpers\DecimalXHelper.pas',
+  DecimalXHelperTest in 'BigNumberXLib.Test\DecimalXHelperTest.pas';
 
 
 var
