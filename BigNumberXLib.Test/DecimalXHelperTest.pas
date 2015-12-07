@@ -1,5 +1,8 @@
 unit DecimalXHelperTest;
 
+// Simple Unit Test for DecimalXHelper.
+// Will add more Soon.
+
 interface
 
 uses
@@ -12,6 +15,14 @@ type
   public
     [Test]
     procedure SqrtTest;
+    [Test]
+    procedure IntPowerTest;
+    [Test]
+    procedure IntRootTest;
+    [Test]
+    procedure ExpTest;
+    [Test]
+    procedure LnTest;
   end;
 
 implementation
@@ -63,6 +74,55 @@ begin
   s := dec1.Sqrt(58).ToString;
   Assert.IsTrue
     (s = '27993718524262253829858552106.4622387227347572406137833208384678543897305217402364794553');
+
+end;
+
+procedure TDecimalXHelperTest.IntPowerTest;
+var
+  dec1: TDecimalX;
+  s: String;
+begin
+  dec1 := TDecimalX.Create('0.42343');
+  s := dec1.IntPower(-4, 30).ToString;
+  Assert.IsTrue(s = '31.108101113585960182989900654048');
+  dec1 := TDecimalX.Create('3.9');
+  s := dec1.IntPower(8, 8).ToString;
+  Assert.IsTrue(s = '53520.09260481');
+end;
+
+procedure TDecimalXHelperTest.IntRootTest;
+var
+  dec1: TDecimalX;
+  s: String;
+begin
+  dec1 := TDecimalX.Create('4.2345');
+  s := dec1.IntRoot(2, 30).ToString;
+  Assert.IsTrue(s = '2.0577900767571020629770974914148');
+
+end;
+
+procedure TDecimalXHelperTest.ExpTest;
+var
+  dec1: TDecimalX;
+  s: String;
+begin
+  dec1 := TDecimalX.Create('1');
+  s := dec1.Exp(46).ToString;
+  Assert.IsTrue(s = '2.7182818284590452353602874713526624977572470937');
+  dec1 := TDecimalX.Create('-0.5');
+  s := dec1.Exp(32).ToString;
+  Assert.IsTrue(s = '0.60653065971263342360379953499118');
+
+end;
+
+procedure TDecimalXHelperTest.LnTest;
+var
+  dec1: TDecimalX;
+  s: String;
+begin
+  dec1 := TDecimalX.Create('2.65');
+  s := dec1.Ln(32).ToString;
+  Assert.IsTrue(s = '0.97455963999813084070924556288652');
 
 end;
 
