@@ -294,26 +294,6 @@ type
     /// <returns>The remainder</returns>
     class function CopyDivRem(data: TArray<UInt32>; divisor: UInt32;
       out quotient: TArray<UInt32>): UInt32; static;
-    /// <summary>
-    /// Calculates Arithmetic shift right.
-    /// </summary>
-    /// <param name="value">Integer value to compute 'Asr' on.</param>
-    /// <param name="ShiftBits"> number of bits to shift value to.</param>
-    /// <returns>Shifted value.</returns>
-    /// <seealso href="http://stackoverflow.com/questions/21940986/">[Delphi ASR Implementation for Integer]</seealso>
-    class function Asr(value: Integer; ShiftBits: Integer): Integer; overload;
-      static; inline;
-
-    /// <summary>
-    /// Calculates Arithmetic shift right.
-    /// </summary>
-    /// <param name="value">Int64 value to compute 'Asr' on.</param>
-    /// <param name="ShiftBits"> number of bits to shift value to.</param>
-    /// <returns>Shifted value.</returns>
-    /// <seealso href="http://github.com/Spelt/ZXing.Delphi/blob/master/Lib/Classes/Common/MathUtils.pas">[Delphi ASR Implementation for Int64]</seealso>
-
-    class function Asr(value: Int64; ShiftBits: Integer): Int64; overload;
-      static; inline;
 
   const
     /// <summary>
@@ -1029,6 +1009,27 @@ type
       overload; static;
 
     /// <summary>
+    /// Calculates Arithmetic shift right.
+    /// </summary>
+    /// <param name="value">Integer value to compute 'Asr' on.</param>
+    /// <param name="ShiftBits"> number of bits to shift value to.</param>
+    /// <returns>Shifted value.</returns>
+    /// <seealso href="http://stackoverflow.com/questions/21940986/">[Delphi ASR Implementation for Integer]</seealso>
+    class function Asr(value: Integer; ShiftBits: Integer): Integer; overload;
+      static; inline;
+
+    /// <summary>
+    /// Calculates Arithmetic shift right.
+    /// </summary>
+    /// <param name="value">Int64 value to compute 'Asr' on.</param>
+    /// <param name="ShiftBits"> number of bits to shift value to.</param>
+    /// <returns>Shifted value.</returns>
+    /// <seealso href="http://github.com/Spelt/ZXing.Delphi/blob/master/Lib/Classes/Common/MathUtils.pas">[Delphi ASR Implementation for Int64]</seealso>
+
+    class function Asr(value: Int64; ShiftBits: Integer): Int64; overload;
+      static; inline;
+
+    /// <summary>
     /// Returns Self + y.
     /// </summary>
     /// <param name="y">The augend.</param>
@@ -1671,7 +1672,6 @@ class function TIntegerX.TryParse(s: String; out v: TIntegerX): Boolean;
 begin
   result := TryParse(s, 10, v);
 end;
-{$ZEROBASEDSTRINGS ON}
 
 class function TIntegerX.TryParse(s: String; radix: Integer;
   out v: TIntegerX): Boolean;
@@ -1716,7 +1716,7 @@ begin
   end;
 
   // skip leading zeros
-  while ((index < len) and (s[index] = '0')) do
+  while ((index < len) and (s.Chars[index] = '0')) do
     Inc(index);
 
   if (index = len) then
@@ -1768,7 +1768,6 @@ begin
   v := TIntegerX.Create(Sign, RemoveLeadingZeros(data));
   result := true;
 end;
-{$ZEROBASEDSTRINGS OFF}
 
 function TIntegerX.ToString(): String;
 begin
@@ -1833,7 +1832,6 @@ begin
   end;
 
 end;
-{$ZEROBASEDSTRINGS ON}
 
 class procedure TIntegerX.AppendDigit(var sb: TStringBuilder; rem: UInt32;
   radix: UInt32; charBuf: TArray<Char>; leadingZeros: Boolean);
@@ -1851,7 +1849,7 @@ begin
   begin
     digit := rem mod radix;
     rem := rem div radix;
-    charBuf[i] := symbols[Integer(digit)];
+    charBuf[i] := symbols.Chars[Integer(digit)];
     Dec(i);
   end;
 
@@ -1868,8 +1866,6 @@ begin
   else
     sb.Append(charBuf, i + 1, bufLen - i - 1);
 end;
-{$ZEROBASEDSTRINGS OFF}
-{$ZEROBASEDSTRINGS ON}
 
 class function TIntegerX.TryParseUInt(val: String; startIndex: Integer;
   len: Integer; radix: Integer; out u: UInt32): Boolean;
@@ -1884,7 +1880,7 @@ begin
   while i < len do
   begin
 
-    if (not TryComputeDigitVal(val[startIndex + i], radix, v)) then
+    if (not TryComputeDigitVal(val.Chars[startIndex + i], radix, v)) then
     begin
       result := false;
       Exit;
@@ -1900,7 +1896,6 @@ begin
   u := UInt32(tempRes);
   result := true;
 end;
-{$ZEROBASEDSTRINGS OFF}
 
 class function TIntegerX.TryComputeDigitVal(c: Char; radix: Integer;
   out v: UInt32): Boolean;
