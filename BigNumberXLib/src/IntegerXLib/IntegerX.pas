@@ -163,7 +163,7 @@ type
     /// <returns></returns>
     /// <seealso href="http://aggregate.org/MAGIC/#Population%20Count%20(Ones%20Count)">[Ones Count]</seealso>
 
-    class function BitCount(x: UInt32): UInt32; static;
+    class function BitCount(x: UInt32): UInt32; overload; static;
 
     /// <summary>
     /// Returns the index of the lowest set bit in this instance's magnitude.
@@ -274,6 +274,11 @@ type
     /// <returns>A (possibly new) UInt32 array with leading zero UInt32's removed.</returns>
     class function RemoveLeadingZeros(data: TArray<UInt32>)
       : TArray<UInt32>; static;
+
+    class function StripLeadingZeroBytes(a: TArray<Byte>)
+      : TArray<UInt32>; static;
+    class function makePositive(a: TArray<Byte>): TArray<UInt32>; static;
+
     /// <summary>
     /// Do a division in place and return the remainder.
     /// </summary>
@@ -294,6 +299,12 @@ type
     /// <returns>The remainder</returns>
     class function CopyDivRem(data: TArray<UInt32>; divisor: UInt32;
       out quotient: TArray<UInt32>): UInt32; static;
+
+    function signInt(): Integer;
+
+    function getInt(n: Integer): Integer;
+
+    function firstNonzeroIntNum(): Integer;
 
   const
     /// <summary>
@@ -1328,11 +1339,17 @@ type
 
     function BitLength(): UInt32;
 
+    function BitCount(): UInt32; overload;
+
+    function ToByteArray(): TArray<Byte>;
+
     /// <summary>
     /// Creates a copy of a <see cref="TIntegerX"/>.
     /// </summary>
     /// <param name="copy">The <see cref="TIntegerX"/> to copy.</param>
     constructor Create(copy: TIntegerX); overload;
+
+    constructor Create(val: TArray<Byte>); overload;
     /// <summary>
     /// Creates a <see cref="TIntegerX"/> from sign/magnitude data.
     /// </summary>
@@ -1410,6 +1427,7 @@ resourcestring
   NegativeAddress = 'Negative bit address';
   CarryOffLeft = 'Carry off left end.';
   ValueOverFlow = 'Value can''t fit in specified type';
+  ZeroLengthValue = 'Zero length BigInteger';
 
 implementation
 
@@ -1632,6 +1650,28 @@ constructor TIntegerX.Create(copy: TIntegerX);
 begin
   _sign := copy._sign;
   _data := copy._data;
+end;
+
+constructor TIntegerX.Create(val: TArray<Byte>);
+begin
+  if (Length(val) = 0) then
+    raise EArgumentException.Create(ZeroLengthValue);
+
+  if (ShortInt(val[0]) < 0) then
+  begin
+    _data := makePositive(val);
+    _sign := -1;
+
+  end
+  else
+  begin
+    _data := StripLeadingZeroBytes(val);
+    if Length(_data) = 0 then
+      _sign := 0
+    else
+      _sign := 1;
+
+  end;
 end;
 
 constructor TIntegerX.Create(Sign: Integer; data: TArray<UInt32>);
@@ -3675,6 +3715,67 @@ begin
   result := n;
 end;
 
+function TIntegerX.BitCount(): UInt32;
+var
+  bc, i, len, magTrailingZeroCount, j: UInt32;
+  m: TArray<Cardinal>;
+begin
+  m := self._data;
+  bc := 0;
+  i := 0;
+  len := Length(self._data);
+  while i < len do
+  begin
+    bc := bc + BitCount(m[i]);
+    Inc(i);
+  end;
+  if (Signum < 0) then
+  begin
+    // Count the trailing zeros in the magnitude
+    magTrailingZeroCount := 0;
+    j := len - 1;
+    while m[j] = 0 do
+    begin
+      magTrailingZeroCount := magTrailingZeroCount + 32;
+      Dec(j);
+    end;
+
+    magTrailingZeroCount := magTrailingZeroCount +
+      UInt32(TrailingZerosCount(m[j]));
+    bc := bc + magTrailingZeroCount - 1;
+  end;
+  result := bc;
+end;
+
+function TIntegerX.ToByteArray(): TArray<Byte>;
+var
+  byteLen, i, bytesCopied, nextInt, intIndex: Integer;
+begin
+  byteLen := Integer(self.BitLength() div 8) + 1;
+  SetLength(result, byteLen);
+  i := byteLen - 1;
+  bytesCopied := 4;
+  nextInt := 0;
+  intIndex := 0;
+  while i >= 0 do
+  begin
+    if (bytesCopied = 4) then
+    begin
+      nextInt := getInt(intIndex);
+      Inc(intIndex);
+      bytesCopied := 1;
+    end
+    else
+    begin
+      nextInt := Asr(nextInt, 8);
+      Inc(bytesCopied);
+    end;
+    result[i] := Byte(nextInt);
+    Dec(i);
+  end;
+
+end;
+
 function TIntegerX.GetPrecision: UInt32;
 var
   digits: UInt32;
@@ -4191,6 +4292,113 @@ begin
   result := tempRes;
 end;
 
+class function TIntegerX.StripLeadingZeroBytes(a: TArray<Byte>): TArray<UInt32>;
+var
+  byteLength, keep, intLength, b, i, bytesRemaining, bytesToTransfer,
+    j: Integer;
+begin
+  byteLength := Length(a);
+  keep := 0;
+  // Find first nonzero byte
+  while ((keep < byteLength) and (a[keep] = 0)) do
+  begin
+    Inc(keep);
+  end;
+
+  // Allocate new array and copy relevant part of input array
+  intLength := Asr(((byteLength - keep) + 3), 2);
+  SetLength(result, intLength);
+  b := byteLength - 1;
+
+  i := intLength - 1;
+  while i >= 0 do
+  begin
+    result[i] := (a[b] and $FF);
+    Dec(b);
+    bytesRemaining := b - keep + 1;
+    bytesToTransfer := Math.Min(3, bytesRemaining);
+    j := 8;
+    while j <= (bytesToTransfer shl 3) do
+    begin
+      result[i] := result[i] or ((a[b] and $FF) shl j);
+      Dec(b);
+      Inc(j, 8);
+    end;
+    Dec(i);
+  end;
+
+end;
+
+class function TIntegerX.makePositive(a: TArray<Byte>): TArray<UInt32>;
+var
+  keep, k, byteLength, extraByte, intLength, b, i, numBytesToTransfer, j,
+    mask: Integer;
+begin
+
+  byteLength := Length(a);
+
+  // Find first non-sign ($ff) byte of input
+  keep := 0;
+  while ((keep < byteLength) and (ShortInt(a[keep]) = -1)) do
+  begin
+    Inc(keep);
+  end;
+
+  { /* Allocate output array.  If all non-sign bytes are $00, we must
+    * allocate space for one extra output byte. */ }
+  k := keep;
+  while ((k < byteLength) and (ShortInt(a[k]) = 0)) do
+  begin
+    Inc(k);
+  end;
+  if k = byteLength then
+    extraByte := 1
+  else
+    extraByte := 0;
+  intLength := ((byteLength - keep + extraByte) + 3) div 4;
+  SetLength(result, intLength);
+
+  { /* Copy one's complement of input into output, leaving extra
+    * byte (if it exists) = $00 */ }
+  b := byteLength - 1;
+  i := intLength - 1;
+  while i >= 0 do
+  begin
+
+    result[i] := (a[b]) and $FF;
+    Dec(b);
+    numBytesToTransfer := Math.Min(3, b - keep + 1);
+    if (numBytesToTransfer < 0) then
+      numBytesToTransfer := 0;
+    j := 8;
+    while j <= 8 * numBytesToTransfer do
+    begin
+
+      result[i] := result[i] or ((a[b] and $FF) shl j);
+      Dec(b);
+      Inc(j, 8);
+    end;
+
+    // Mask indicates which bits must be complemented
+
+    mask := Asr(UInt32(-1), (8 * (3 - numBytesToTransfer)));
+    result[i] := (not result[i]) and mask;
+    Dec(i);
+  end;
+
+  // Add one to one's complement to generate two's complement
+  i := Length(result) - 1;
+  while i >= 0 do
+  begin
+    result[i] := Integer((result[i] and $FFFFFFFF) + 1);
+    if (result[i] <> 0) then
+      break;
+
+    Dec(i);
+  end;
+
+end;
+
 class function TIntegerX.InPlaceDivRem(var data: TArray<UInt32>;
   var index: Integer; divisor: UInt32): UInt32;
 var
@@ -4247,6 +4455,61 @@ begin
 
   quotient := RemoveLeadingZeros(quotient);
   result := UInt32(rem);
+end;
+
+function TIntegerX.signInt(): Integer;
+begin
+  if self.Signum < 0 then
+    result := -1
+  else
+    result := 0;
+end;
+
+function TIntegerX.getInt(n: Integer): Integer;
+var
+  magInt: Integer;
+begin
+  if (n < 0) then
+  begin
+    result := 0;
+    Exit;
+  end;
+  if (n >= Length(self._data)) then
+  begin
+    result := signInt();
+    Exit;
+  end;
+
+  magInt := self._data[Length(self._data) - n - 1];
+
+  if Signum >= 0 then
+    result := magInt
+  else
+  begin
+    if n <= firstNonzeroIntNum() then
+      result := -magInt
+    else
+      result := not magInt;
+  end;
+
+end;
+
+function TIntegerX.firstNonzeroIntNum(): Integer;
+var
+  fn, i, mlen: Integer;
+begin
+
+  // Search for the first nonzero int
+  mlen := Length(self._data);
+  i := mlen - 1;
+
+  while ((i >= 0) and (self._data[i] = 0)) do
+  begin
+    Dec(i);
+  end;
+
+  fn := mlen - i - 1;
+  result := fn;
 end;
 
 class function TIntegerX.GetZero: TIntegerX;
