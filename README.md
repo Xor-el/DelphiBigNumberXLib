@@ -133,4 +133,4 @@ This Program is Licensed Under **`Mozilla Public License  v. 2.0`**
 Conclusion
 --------------------------------------------------
 
-   Special Thanks to the makers of [ClojureCLR](https://github.com/clojure/clojure-clr/) .
+   Special Thanks to the makers of [ClojureCLR](https://github.com/clojure/clojure-clr/) and [Leo Aso](https://github.com/LeoAso).
